@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - MesRecettes{% endblock %}
+
+{% block content %}
+<!-- Hero Section du profil -->
+<section class="relative py-20 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 overflow-hidden">
+    <!-- Motifs de fond -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-xl animate-float"></div>
+        <div class="absolute bottom-1/4 left-1/4 w-80 h-80 bg-accent-300 rounded-full mix-blend-overlay filter blur-xl animate-float" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row items-center lg:items-start space-y-8 lg:space-y-0 lg:space-x-12">
+            <!-- Photo de profil -->
+            <div class="relative">
+                <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-3xl overflow-hidden ring-4 ring-white/20 shadow-strong">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-white/20 to-white/10 flex items-center justify-center">
+                            <i class="fas fa-user text-white text-4xl lg:text-5xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Badge de statut -->
+                <div class="absolute -bottom-2 -right-2 bg-secondary-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-medium">
+                    <i class="fas fa-chef-hat mr-1"></i>
+                    Chef
+                </div>
+            </div>
+            
+            <!-- Informations du profil -->
+            <div class="flex-1 text-center lg:text-left">
+                <h1 class="text-3xl lg:text-4xl font-display font-bold text-white mb-2">
+                    {{ profile_user.get_full_name|default:profile_user.username }}
+                </h1>
+                
+                {% if profile_user.username != profile_user.get_full_name %}
+                    <p class="text-white/80 text-lg mb-4">@{{ profile_user.username }}</p>
+                {% endif %}
+                
+                {% if profile.bio %}
+                    <p class="text-white/90 text-lg mb-6 max-w-2xl">{{ profile.bio }}</p>
+                {% endif %}
+                
+                <!-- Informations supplémentaires -->
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4 mb-6">
+                    {% if profile.location %}
+                        <div class="flex items-center text-white/80">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span>{{ profile.location }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if profile.website %}
+                        <a href="{{ profile.website }}" target="_blank" class="flex items-center text-white/80 hover:text-white transition-colors duration-300">
+                            <i class="fas fa-globe mr-2"></i>
+                            <span>Site web</span>
+                        </a>
+                    {% endif %}
+                    
+                    <div class="flex items-center text-white/80">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        <span>Membre depuis {{ profile.created_at|date:"F Y" }}</span>
+                    </div>
+                </div>
+                
+                <!-- Statistiques -->
+                <div class="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0">
+                    <div class="text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white">{{ profile.recipes_count }}</div>
+                        <div class="text-white/80 text-sm">Recette{{ profile.recipes_count|pluralize }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white">{{ profile.likes_received }}</div>
+                        <div class="text-white/80 text-sm">J'aime reçus</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white">{{ profile_user.favorite_recipes.count }}</div>
+                        <div class="text-white/80 text-sm">Favori{{ profile_user.favorite_recipes.count|pluralize }}</div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                {% if is_own_profile %}
+                    <div class="mt-8">
+                        <a href="{% url 'accounts:profile_edit' %}" class="inline-flex items-center px-6 py-3 rounded-xl bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 hover:shadow-lg transition-all duration-300 group">
+                            <i class="fas fa-edit mr-2 group-hover:scale-110 transition-transform duration-300"></i>
+                            Modifier mon profil
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Navigation des onglets -->
+<section class="bg-white border-b border-neutral-200 sticky top-20 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex space-x-8" id="profile-tabs">
+            <button class="tab-button active py-4 px-2 border-b-2 border-primary-500 text-primary-600 font-semibold" data-tab="recipes">
+                <i class="fas fa-book mr-2"></i>
+                Recettes ({{ recipes|length }})
+            </button>
+            {% if is_own_profile and favorites %}
+                <button class="tab-button py-4 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700 font-semibold transition-colors duration-300" data-tab="favorites">
+                    <i class="fas fa-heart mr-2"></i>
+                    Favoris ({{ favorites|length }})
+                </button>
+            {% endif %}
+        </nav>
+    </div>
+</section>
+
+<!-- Contenu des onglets -->
+<section class="py-16 bg-gradient-to-b from-white to-neutral-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Onglet Recettes -->
+        <div id="recipes-tab" class="tab-content">
+            {% if recipes %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for recipe in recipes %}
+                    <article class="recipe-card relative bg-white rounded-2xl shadow-soft overflow-hidden group">
+                        <a href="{{ recipe.get_absolute_url }}" class="absolute inset-0 z-10" aria-label="Voir la recette" style="background:transparent;"></a>
+                        <div class="relative h-48 image-hover-effect pointer-events-none">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                                    <i class="fas fa-image text-neutral-400 text-3xl"></i>
+                                </div>
+                            {% endif %}
+                            {% if recipe.category %}
+                                <div class="absolute top-3 left-3">
+                                    <span class="text-white px-2 py-1 rounded-lg text-xs font-bold shadow-medium" style="background: linear-gradient(135deg, {{ recipe.category.color }}, {{ recipe.category.color }}dd);">
+                                        {{ recipe.category.name }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div class="absolute bottom-3 left-3 flex items-center space-x-1">
+                                <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    {{ recipe.total_time }}min
+                                </div>
+                                <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-users mr-1"></i>
+                                    {{ recipe.servings }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-5 pointer-events-none">
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="text-lg font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 flex-1 mr-2">
+                                    {{ recipe.title }}
+                                </h3>
+                                <div class="flex items-center space-x-1 flex-shrink-0">
+                                    {% if recipe.difficulty == 'facile' %}
+                                        <i class="fas fa-star text-secondary-500 text-xs"></i>
+                                        <i class="far fa-star text-neutral-300 text-xs"></i>
+                                        <i class="far fa-star text-neutral-300 text-xs"></i>
+                                    {% elif recipe.difficulty == 'moyen' %}
+                                        <i class="fas fa-star text-accent-500 text-xs"></i>
+                                        <i class="fas fa-star text-accent-500 text-xs"></i>
+                                        <i class="far fa-star text-neutral-300 text-xs"></i>
+                                    {% else %}
+                                        <i class="fas fa-star text-red-500 text-xs"></i>
+                                        <i class="fas fa-star text-red-500 text-xs"></i>
+                                        <i class="fas fa-star text-red-500 text-xs"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="text-neutral-600 text-sm mb-4 leading-relaxed">{{ recipe.description|truncatewords:12 }}</p>
+                            <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
+                                <div class="text-xs text-neutral-500">
+                                    Publié le {{ recipe.created_at|date:"d M Y" }}
+                                </div>
+                                <div class="flex items-center space-x-3 text-xs text-neutral-500">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-heart mr-1 text-red-500"></i>
+                                        <span id="like-count-{{ recipe.slug }}">{{ recipe.likes.count }}</span>
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-comment mr-1"></i>
+                                        {{ recipe.comments.count }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if is_own_profile %}
+                        <div class="absolute top-3 right-3 flex flex-col space-y-2 z-20">
+                            <a href="{{ recipe.get_absolute_url }}" class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-primary-500 hover:text-primary-700 transition-all duration-300 hover:scale-110" title="Voir la recette">
+                                <i class="fas fa-eye text-sm"></i>
+                            </a>
+                            <a href="{% url 'recipes:edit' recipe.slug %}" class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-neutral-600 hover:text-primary-500 transition-all duration-300 hover:scale-110" title="Modifier">
+                                <i class="fas fa-edit text-sm"></i>
+                            </a>
+                            <form method="post" action="{% url 'recipes:delete' recipe.slug %}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette recette ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 transition-all duration-300 hover:scale-110" title="Supprimer">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </article>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if recipes.has_other_pages %}
+                    <div class="flex justify-center mt-12">
+                        <nav class="flex items-center space-x-2">
+                            {% if recipes.has_previous %}
+                                <a href="?page={{ recipes.previous_page_number }}" class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in recipes.paginator.page_range %}
+                                {% if recipes.number == num %}
+                                    <span class="w-10 h-10 bg-primary-500 text-white rounded-xl flex items-center justify-center font-semibold shadow-glow">
+                                        {{ num }}
+                                    </span>
+                                {% elif num > recipes.number|add:'-3' and num < recipes.number|add:'3' %}
+                                    <a href="?page={{ num }}" class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                        {{ num }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if recipes.has_next %}
+                                <a href="?page={{ recipes.next_page_number }}" class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <!-- Aucune recette -->
+                <div class="text-center py-16">
+                    <div class="w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-book text-neutral-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-bold text-neutral-900 mb-4">
+                        {% if is_own_profile %}
+                            Vous n'avez pas encore de recettes
+                        {% else %}
+                            Aucune recette publiée
+                        {% endif %}
+                    </h3>
+                    <p class="text-neutral-600 mb-8 max-w-md mx-auto">
+                        {% if is_own_profile %}
+                            Commencez à partager vos créations culinaires avec la communauté !
+                        {% else %}
+                            {{ profile_user.first_name|default:profile_user.username }} n'a pas encore partagé de recettes.
+                        {% endif %}
+                    </p>
+                    {% if is_own_profile %}
+                        <a href="{% url 'recipes:create' %}" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>
+                            Créer ma première recette
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Onglet Favoris -->
+        {% if is_own_profile and favorites %}
+            <div id="favorites-tab" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for recipe in favorites %}
+                    <article class="recipe-card relative bg-white rounded-2xl shadow-soft overflow-hidden group">
+                        <!-- Contenu similaire aux recettes mais avec badge favori -->
+                        <div class="relative h-48 image-hover-effect">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                                    <i class="fas fa-image text-neutral-400 text-3xl"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Badge favori -->
+                            <div class="absolute top-3 left-3">
+                                <span class="bg-accent-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-medium">
+                                    <i class="fas fa-heart mr-1"></i>
+                                    Favori
+                                </span>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <button onclick="toggleFavorite('{{ recipe.slug }}')" class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-accent-500 hover:text-red-500 transition-all duration-300 hover:scale-110" id="favorite-btn-{{ recipe.slug }}">
+                                    <i class="fas fa-bookmark text-sm"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Infos rapides -->
+                            <div class="absolute bottom-3 left-3 flex items-center space-x-1">
+                                <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    {{ recipe.total_time }}min
+                                </div>
+                                <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-users mr-1"></i>
+                                    {{ recipe.servings }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenu -->
+                        <div class="p-5">
+                            <h3 class="text-lg font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 mb-2">
+                                <a href="{{ recipe.get_absolute_url }}">{{ recipe.title }}</a>
+                            </h3>
+                            
+                            <p class="text-neutral-600 text-sm mb-4 leading-relaxed">{{ recipe.description|truncatewords:12 }}</p>
+                            
+                            <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
+                                <div class="flex items-center space-x-2">
+                                    {% if recipe.author.profile.avatar %}
+                                        <img src="{{ recipe.author.profile.avatar.url }}" alt="{{ recipe.author.username }}" class="w-6 h-6 rounded-full object-cover">
+                                    {% else %}
+                                        <div class="w-6 h-6 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-white text-xs"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="text-xs font-medium text-neutral-700">{{ recipe.author.first_name|default:recipe.author.username }}</span>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3 text-xs text-neutral-500">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-heart mr-1 text-red-500"></i>
+                                        {{ recipe.likes.count }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% csrf_token %}
+
+<script>
+// Gestion des onglets
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Désactiver tous les onglets
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active', 'border-primary-500', 'text-primary-600');
+                btn.classList.add('border-transparent', 'text-neutral-500');
+            });
+            
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Activer l'onglet sélectionné
+            this.classList.add('active', 'border-primary-500', 'text-primary-600');
+            this.classList.remove('border-transparent', 'text-neutral-500');
+            
+            const targetContent = document.getElementById(targetTab + '-tab');
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

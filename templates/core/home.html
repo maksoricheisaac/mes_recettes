@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - MesRecettes{% endblock %}
+
+{% block content %}
+<!-- Hero Section avec parallax et animations -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background avec gradients animés -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600"></div>
+    
+    <!-- Motifs de fond animés -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-xl animate-float"></div>
+        <div class="absolute top-3/4 right-1/4 w-96 h-96 bg-accent-300 rounded-full mix-blend-overlay filter blur-xl animate-float" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-80 h-80 bg-secondary-300 rounded-full mix-blend-overlay filter blur-xl animate-float" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <!-- Particules flottantes -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 left-20 w-2 h-2 bg-white rounded-full opacity-60 animate-bounce" style="animation-delay: 1s;"></div>
+        <div class="absolute top-40 right-32 w-1 h-1 bg-accent-200 rounded-full opacity-80 animate-bounce" style="animation-delay: 3s;"></div>
+        <div class="absolute bottom-32 left-1/3 w-3 h-3 bg-secondary-200 rounded-full opacity-50 animate-bounce" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 right-20 w-2 h-2 bg-white rounded-full opacity-70 animate-bounce" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="animate-fade-in">
+            <!-- Badge de bienvenue -->
+            <div class="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white mb-8 animate-bounce-subtle">
+                <i class="fas fa-sparkles mr-2 text-accent-300"></i>
+                <span class="font-medium">Bienvenue dans l'univers culinaire</span>
+            </div>
+            
+            <!-- Titre principal avec effet de typing -->
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-tight">
+                Découvrez des recettes
+                <span class="block bg-gradient-to-r from-accent-300 via-accent-200 to-secondary-300 bg-clip-text text-transparent animate-pulse-soft">
+                    extraordinaires
+                </span>
+            </h1>
+            
+            <!-- Sous-titre -->
+            <p class="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed font-light">
+                Partagez vos plats préférés avec une communauté passionnée de cuisine et découvrez des saveurs du monde entier
+            </p>
+            
+            <!-- Boutons d'action avec effets -->
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+                <a href="{% url 'recipes:list' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-compass mr-3 group-hover:rotate-180 transition-transform duration-500"></i>
+                        Découvrir les recettes
+                    </div>
+                </a>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'recipes:create' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong">
+                        <div class="absolute inset-0 bg-gradient-to-r from-accent-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-plus mr-3 group-hover:rotate-90 transition-transform duration-300"></i>
+                            Partager une recette
+                        </div>
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong">
+                        <div class="absolute inset-0 bg-gradient-to-r from-accent-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-user-plus mr-3 group-hover:scale-110 transition-transform duration-300"></i>
+                            Rejoindre la communauté
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Statistiques avec compteurs animés -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="glass rounded-2xl p-6 text-center group hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl md:text-4xl font-bold text-white mb-2 counter" data-target="1250">0</div>
+                    <div class="text-white/80 font-medium">Recettes partagées</div>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center group hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl md:text-4xl font-bold text-white mb-2 counter" data-target="850">0</div>
+                    <div class="text-white/80 font-medium">Chefs passionnés</div>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center group hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl md:text-4xl font-bold text-white mb-2 counter" data-target="15000">0</div>
+                    <div class="text-white/80 font-medium">Avis positifs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
+            <div class="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Recettes en vedette avec design premium -->
+{% if featured_recipes %}
+<section class="py-24 bg-gradient-to-b from-white to-neutral-50 animate-on-scroll">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête de section -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary-100 text-primary-600 font-medium mb-4">
+                <i class="fas fa-star mr-2"></i>
+                Sélection premium
+            </div>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-neutral-900 mb-6">
+                Recettes en 
+                <span class="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">vedette</span>
+            </h2>
+            <p class="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+                Découvrez les créations culinaires exceptionnelles sélectionnées par notre équipe d'experts
+            </p>
+        </div>
+        
+        <!-- Grid des recettes vedettes -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {% for recipe in featured_recipes %}
+            <article class="recipe-card relative bg-white rounded-3xl shadow-soft overflow-hidden group">
+                <!-- Image avec overlay -->
+                <div class="relative h-64 image-hover-effect">
+                    {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                            <i class="fas fa-image text-neutral-400 text-5xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Badge vedette -->
+                    <div class="absolute top-4 right-4">
+                        <div class="bg-gradient-to-r from-accent-500 to-accent-600 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center shadow-medium">
+                            <i class="fas fa-crown mr-1"></i>
+                            Vedette
+                        </div>
+                    </div>
+                    
+                    <!-- Informations rapides -->
+                    <div class="absolute bottom-4 left-4 flex items-center space-x-2">
+                        <div class="glass-dark text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ recipe.total_time }} min
+                        </div>
+                        <div class="glass-dark text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-users mr-1"></i>
+                            {{ recipe.servings }}
+                        </div>
+                    </div>
+                    
+                    <!-- Overlay avec actions -->
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                        <a href="{{ recipe.get_absolute_url }}" class="bg-white text-neutral-900 px-6 py-3 rounded-xl font-semibold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-eye mr-2"></i>
+                            Voir la recette
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Contenu -->
+                <div class="p-8">
+                    <!-- Catégorie et difficulté -->
+                    <div class="flex items-center justify-between mb-4">
+                        {% if recipe.category %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style="background-color: {{ recipe.category.color }}20; color: {{ recipe.category.color }};">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ recipe.category.name }}
+                            </span>
+                        {% endif %}
+                        <div class="flex items-center space-x-1">
+                            {% if recipe.difficulty == 'facile' %}
+                                <i class="fas fa-star text-secondary-500"></i>
+                                <i class="far fa-star text-neutral-300"></i>
+                                <i class="far fa-star text-neutral-300"></i>
+                            {% elif recipe.difficulty == 'moyen' %}
+                                <i class="fas fa-star text-accent-500"></i>
+                                <i class="fas fa-star text-accent-500"></i>
+                                <i class="far fa-star text-neutral-300"></i>
+                            {% else %}
+                                <i class="fas fa-star text-red-500"></i>
+                                <i class="fas fa-star text-red-500"></i>
+                                <i class="fas fa-star text-red-500"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Titre -->
+                    <h3 class="text-2xl font-display font-bold text-neutral-900 mb-3 group-hover:text-primary-600 transition-colors duration-300">
+                        <a href="{{ recipe.get_absolute_url }}">{{ recipe.title }}</a>
+                    </h3>
+                    
+                    <!-- Description -->
+                    <p class="text-neutral-600 mb-6 leading-relaxed">{{ recipe.description|truncatewords:20 }}</p>
+                    
+                    <!-- Footer avec auteur et stats -->
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-100">
+                        <div class="flex items-center space-x-3">
+                            {% if recipe.author.profile.avatar %}
+                                <img src="{{ recipe.author.profile.avatar.url }}" alt="{{ recipe.author.username }}" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-medium">
+                            {% else %}
+                                <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="font-semibold text-neutral-900">{{ recipe.author.first_name|default:recipe.author.username }}</div>
+                                <div class="text-sm text-neutral-500">Chef passionné</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            {% if user.is_authenticated %}
+                                <button onclick="toggleLike('{{ recipe.slug }}')" class="like-btn text-neutral-400 hover:text-red-500 transition-all duration-300" id="like-btn-{{ recipe.slug }}">
+                                    {% if user in recipe.likes.all %}
+                                        <i class="fas fa-heart text-red-500"></i>
+                                    {% else %}
+                                        <i class="far fa-heart"></i>
+                                    {% endif %}
+                                </button>
+                                <span class="text-sm font-medium text-neutral-600" id="like-count-{{ recipe.slug }}">{{ recipe.num_likes|default:recipe.likes.count }}</span>
+                            {% else %}
+                                <div class="flex items-center space-x-1 text-neutral-500">
+                                    <i class="fas fa-heart text-red-500"></i>
+                                    <span class="text-sm font-medium">{{ recipe.num_likes|default:recipe.likes.count }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex items-center space-x-1 text-neutral-500">
+                                <i class="fas fa-comment"></i>
+                                <span class="text-sm font-medium">{{ recipe.comments.count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Catégories avec design moderne -->
+<section class="py-24 bg-white animate-on-scroll">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-secondary-100 text-secondary-600 font-medium mb-4">
+                <i class="fas fa-utensils mr-2"></i>
+                Explorez par goût
+            </div>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-neutral-900 mb-6">
+                Catégories 
+                <span class="bg-gradient-to-r from-secondary-600 to-primary-600 bg-clip-text text-transparent">populaires</span>
+            </h2>
+            <p class="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+                Trouvez la recette parfaite selon vos envies du moment
+            </p>
+        </div>
+        
+        <!-- Grid des catégories -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {% for category in categories %}
+            <a href="{% url 'recipes:category' category.slug %}" class="group">
+                <div class="bg-white rounded-2xl shadow-soft p-8 text-center hover:shadow-strong transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 border border-neutral-100">
+                    <!-- Icône avec gradient -->
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, {{ category.color }}20, {{ category.color }}10);">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                        <i class="fas fa-utensils text-2xl relative z-10" style="color: {{ category.color }};"></i>
+                    </div>
+                    
+                    <!-- Nom de la catégorie -->
+                    <h3 class="text-lg font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 mb-2">
+                        {{ category.name }}
+                    </h3>
+                    
+                    <!-- Nombre de recettes -->
+                    <p class="text-sm text-neutral-500 font-medium">
+                        {{ category.recipe_set.count }} recette{{ category.recipe_set.count|pluralize }}
+                    </p>
+                    
+                    <!-- Indicateur de hover -->
+                    <div class="w-0 h-1 bg-gradient-to-r from-primary-500 to-secondary-500 mx-auto mt-4 group-hover:w-full transition-all duration-300 rounded-full"></div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Recettes populaires avec masonry layout -->
+<section class="py-24 bg-gradient-to-b from-neutral-50 to-white animate-on-scroll">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-accent-100 text-accent-600 font-medium mb-4">
+                <i class="fas fa-fire mr-2"></i>
+                Tendances du moment
+            </div>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-neutral-900 mb-6">
+                Recettes 
+                <span class="bg-gradient-to-r from-accent-600 to-red-600 bg-clip-text text-transparent">populaires</span>
+            </h2>
+            <p class="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+                Les créations les plus appréciées par notre communauté de gourmets
+            </p>
+        </div>
+        
+        <!-- Grid des recettes populaires -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for recipe in recipes %}
+            <article class="recipe-card relative bg-white rounded-3xl shadow-soft overflow-hidden group">
+                <!-- Image -->
+                <div class="relative h-56 image-hover-effect">
+                    {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                            <i class="fas fa-image text-neutral-400 text-4xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Badge catégorie -->
+                    {% if recipe.category %}
+                        <div class="absolute top-4 left-4">
+                            <span class="text-white px-3 py-1 rounded-full text-sm font-bold shadow-medium" style="background: linear-gradient(135deg, {{ recipe.category.color }}, {{ recipe.category.color }}dd);">
+                                {{ recipe.category.name }}
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Actions rapides -->
+                    <div class="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        {% if user.is_authenticated %}
+                            <button onclick="toggleLike('{{ recipe.slug }}')" class="like-btn w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-neutral-600 hover:text-red-500 transition-all duration-300 hover:scale-110" id="like-btn-{{ recipe.slug }}">
+                                {% if user in recipe.likes.all %}
+                                    <i class="fas fa-heart text-red-500"></i>
+                                {% else %}
+                                    <i class="far fa-heart"></i>
+                                {% endif %}
+                            </button>
+                            <button onclick="toggleFavorite('{{ recipe.slug }}')" class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-neutral-600 hover:text-accent-500 transition-all duration-300 hover:scale-110" id="favorite-btn-{{ recipe.slug }}">
+                                {% if user in recipe.favorites.all %}
+                                    <i class="fas fa-bookmark text-accent-500"></i>
+                                {% else %}
+                                    <i class="far fa-bookmark"></i>
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Infos rapides -->
+                    <div class="absolute bottom-4 left-4 flex items-center space-x-2">
+                        <div class="glass-dark text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ recipe.total_time }} min
+                        </div>
+                        <div class="glass-dark text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-users mr-1"></i>
+                            {{ recipe.servings }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenu -->
+                <div class="p-6">
+                    <!-- Titre et difficulté -->
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-xl font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 flex-1 mr-4">
+                            <a href="{{ recipe.get_absolute_url }}">{{ recipe.title }}</a>
+                        </h3>
+                        <div class="flex items-center space-x-1 flex-shrink-0">
+                            {% if recipe.difficulty == 'facile' %}
+                                <i class="fas fa-star text-secondary-500 text-sm"></i>
+                                <i class="far fa-star text-neutral-300 text-sm"></i>
+                                <i class="far fa-star text-neutral-300 text-sm"></i>
+                            {% elif recipe.difficulty == 'moyen' %}
+                                <i class="fas fa-star text-accent-500 text-sm"></i>
+                                <i class="fas fa-star text-accent-500 text-sm"></i>
+                                <i class="far fa-star text-neutral-300 text-sm"></i>
+                            {% else %}
+                                <i class="fas fa-star text-red-500 text-sm"></i>
+                                <i class="fas fa-star text-red-500 text-sm"></i>
+                                <i class="fas fa-star text-red-500 text-sm"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <p class="text-neutral-600 mb-4 leading-relaxed">{{ recipe.description|truncatewords:15 }}</p>
+                    
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-100">
+                        <div class="flex items-center space-x-3">
+                            {% if recipe.author.profile.avatar %}
+                                <img src="{{ recipe.author.profile.avatar.url }}" alt="{{ recipe.author.username }}" class="w-8 h-8 rounded-full object-cover">
+                            {% else %}
+                                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-xs"></i>
+                                </div>
+                            {% endif %}
+                            <span class="text-sm font-medium text-neutral-700">{{ recipe.author.first_name|default:recipe.author.username }}</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span class="flex items-center">
+                                <i class="fas fa-heart mr-1 text-red-500"></i>
+                                <span id="like-count-{{ recipe.slug }}">{{ recipe.likes.count }}</span>
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-comment mr-1"></i>
+                                {{ recipe.comments.count }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        <!-- Bouton voir plus -->
+        <div class="text-center mt-16">
+            <a href="{% url 'recipes:list' %}" class="inline-flex items-center justify-center px-8 py-4 rounded-2xl font-bold text-lg bg-gradient-to-r from-primary-600 to-secondary-600 text-white shadow-lg hover:scale-105 hover:shadow-strong transition-all duration-300 group">
+            <span>Découvrir toutes les recettes</span>
+            <i class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section avec design premium -->
+<section class="relative py-24 overflow-hidden">
+    <!-- Background avec gradients complexes -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-secondary-900"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+    
+    <!-- Motifs géométriques -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-float"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-accent-300 rounded-full mix-blend-overlay filter blur-3xl animate-float" style="animation-delay: 3s;"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="animate-on-scroll">
+            <!-- Badge -->
+            <div class="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white mb-8">
+                <i class="fas fa-rocket mr-2 text-accent-300"></i>
+                <span class="font-medium">Rejoignez l'aventure culinaire</span>
+            </div>
+            
+            <!-- Titre -->
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6 leading-tight">
+                Prêt à partager vos 
+                <span class="bg-gradient-to-r from-accent-300 to-secondary-300 bg-clip-text text-transparent">créations</span> ?
+            </h2>
+            
+            <!-- Description -->
+            <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
+                Rejoignez notre communauté de passionnés de cuisine et partagez vos recettes avec des milliers de gourmets
+            </p>
+            
+            <!-- Boutons -->
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'recipes:create' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong">
+                        <div class="absolute inset-0 bg-gradient-to-r from-accent-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-plus mr-3 group-hover:rotate-90 transition-transform duration-300"></i>
+                            Créer ma première recette
+                        </div>
+                    </a>
+                    <a href="{% url 'accounts:profile' user.username %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong ml-2">
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-user mr-3 group-hover:scale-110 transition-transform duration-300"></i>
+                            Voir mon profil
+                        </div>
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong">
+                        <div class="absolute inset-0 bg-gradient-to-r from-accent-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-user-plus mr-3 group-hover:scale-110 transition-transform duration-300"></i>
+                            Créer mon compte gratuit
+                        </div>
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="group relative overflow-hidden bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-strong flex items-center mt-2">
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex items-center group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-sign-in-alt mr-3 group-hover:translate-x-1 transition-transform duration-300"></i>
+                            J'ai déjà un compte
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Témoignages ou features -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="w-12 h-12 bg-accent-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Communauté bienveillante</h3>
+                    <p class="text-white/80 text-sm">Partagez et découvrez dans une ambiance conviviale</p>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="w-12 h-12 bg-secondary-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Recherche intelligente</h3>
+                    <p class="text-white/80 text-sm">Trouvez la recette parfaite en quelques clics</p>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Toujours avec vous</h3>
+                    <p class="text-white/80 text-sm">Interface responsive pour cuisiner partout</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% csrf_token %}
+
+<!-- Script pour les compteurs animés -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des compteurs
+    const counters = document.querySelectorAll('.counter');
+    const animateCounter = (counter) => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        const increment = target / 100;
+        let current = 0;
+        
+        const updateCounter = () => {
+            if (current < target) {
+                current += increment;
+                counter.textContent = Math.floor(current);
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.textContent = target;
+            }
+        };
+        
+        updateCounter();
+    };
+    
+    // Observer pour déclencher l'animation quand visible
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                counterObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    counters.forEach(counter => {
+        counterObserver.observe(counter);
+    });
+});
+</script>
+{% endblock %}

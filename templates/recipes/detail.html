@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ recipe.title }} - MesRecettes{% endblock %}
+
+{% block content %}
+<!-- Hero Section de la recette -->
+<section class="relative h-96 lg:h-[500px] overflow-hidden">
+    <!-- Image de fond -->
+    {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+    {% else %}
+        <div class="w-full h-full bg-gradient-to-br from-neutral-300 to-neutral-400"></div>
+    {% endif %}
+    
+    <!-- Overlay gradient -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+    
+    <!-- Contenu -->
+    <div class="absolute inset-0 flex items-end">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 w-full">
+            <div class="max-w-4xl">
+                <!-- Breadcrumb -->
+                <nav class="flex items-center space-x-2 text-white/80 text-sm mb-4">
+                    <a href="{% url 'core:home' %}" class="hover:text-white transition-colors">Accueil</a>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <a href="{% url 'recipes:list' %}" class="hover:text-white transition-colors">Recettes</a>
+                    {% if recipe.category %}
+                        <i class="fas fa-chevron-right text-xs"></i>
+                        <a href="{% url 'recipes:category' recipe.category.slug %}" class="hover:text-white transition-colors">{{ recipe.category.name }}</a>
+                    {% endif %}
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <span class="text-white">{{ recipe.title }}</span>
+                </nav>
+                
+                <!-- Titre et métadonnées -->
+                <h1 class="text-3xl lg:text-5xl font-display font-bold text-white mb-4">
+                    {{ recipe.title }}
+                </h1>
+                
+                <p class="text-xl text-white/90 mb-6 leading-relaxed">
+                    {{ recipe.description }}
+                </p>
+                
+                <!-- Informations rapides -->
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    {% if recipe.category %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white" style="background: linear-gradient(135deg, {{ recipe.category.color }}, {{ recipe.category.color }}dd);">
+                            <i class="fas fa-tag mr-1"></i>
+                            {{ recipe.category.name }}
+                        </span>
+                    {% endif %}
+                    
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-white/20 backdrop-blur-sm text-white">
+                        <i class="fas fa-clock mr-1"></i>
+                        {{ recipe.total_time }} min
+                    </span>
+                    
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-white/20 backdrop-blur-sm text-white">
+                        <i class="fas fa-users mr-1"></i>
+                        {{ recipe.servings }} portion{{ recipe.servings|pluralize }}
+                    </span>
+                    
+                    <div class="flex items-center space-x-1">
+                        {% if recipe.difficulty == 'facile' %}
+                            <i class="fas fa-star text-secondary-400"></i>
+                            <i class="far fa-star text-white/50"></i>
+                            <i class="far fa-star text-white/50"></i>
+                            <span class="text-white/80 text-sm ml-1">Facile</span>
+                        {% elif recipe.difficulty == 'moyen' %}
+                            <i class="fas fa-star text-accent-400"></i>
+                            <i class="fas fa-star text-accent-400"></i>
+                            <i class="far fa-star text-white/50"></i>
+                            <span class="text-white/80 text-sm ml-1">Moyen</span>
+                        {% else %}
+                            <i class="fas fa-star text-red-400"></i>
+                            <i class="fas fa-star text-red-400"></i>
+                            <i class="fas fa-star text-red-400"></i>
+                            <span class="text-white/80 text-sm ml-1">Difficile</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Auteur et actions -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <!-- Auteur -->
+                    <div class="flex items-center space-x-3">
+                        {% if recipe.author.profile.avatar %}
+                            <img src="{{ recipe.author.profile.avatar.url }}" alt="{{ recipe.author.username }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-white/20">
+                        {% else %}
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <div class="text-white font-semibold">
+                                <a href="{% url 'accounts:profile' recipe.author.username %}" class="hover:text-white/80 transition-colors">
+                                    {{ recipe.author.get_full_name|default:recipe.author.username }}
+                                </a>
+                            </div>
+                            <div class="text-white/70 text-sm">Publié le {{ recipe.created_at|date:"d F Y" }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex items-center space-x-3">
+                        {% if user.is_authenticated %}
+                            <button onclick="toggleLike('{{ recipe.slug }}')" class="like-btn flex items-center space-x-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105" id="like-btn-{{ recipe.slug }}">
+                                {% if user_liked %}
+                                    <i class="fas fa-heart text-red-400"></i>
+                                {% else %}
+                                    <i class="far fa-heart"></i>
+                                {% endif %}
+                                <span id="like-count-{{ recipe.slug }}">{{ recipe.likes.count }}</span>
+                            </button>
+                            
+                            <button onclick="toggleFavorite('{{ recipe.slug }}')" class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105" id="favorite-btn-{{ recipe.slug }}">
+                                {% if user_favorited %}
+                                    <i class="fas fa-bookmark text-accent-400"></i>
+                                {% else %}
+                                    <i class="far fa-bookmark"></i>
+                                {% endif %}
+                                <span class="hidden sm:inline">Favoris</span>
+                            </button>
+                        {% endif %}
+                        
+                        {% if user == recipe.author %}
+                            <a href="{% url 'recipes:edit' recipe.slug %}" class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105">
+                                <i class="fas fa-edit"></i>
+                                <span class="hidden sm:inline">Modifier</span>
+                            </a>
+                        {% endif %}
+                        
+                        <button onclick="shareRecipe()" class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-share-alt"></i>
+                            <span class="hidden sm:inline">Partager</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contenu principal -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Colonne principale -->
+            <div class="lg:col-span-2 space-y-12">
+                <!-- Temps de préparation détaillé -->
+                <div class="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-3xl p-8">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-clock text-primary-500 mr-3"></i>
+                        Temps de préparation
+                    </h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-2">{{ recipe.prep_time }}</div>
+                            <div class="text-neutral-600 font-medium">minutes de préparation</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-secondary-600 mb-2">{{ recipe.cook_time }}</div>
+                            <div class="text-neutral-600 font-medium">minutes de cuisson</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ingrédients -->
+                <div class="bg-white rounded-3xl shadow-soft p-8">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-list text-secondary-500 mr-3"></i>
+                        Ingrédients
+                        <span class="ml-auto text-sm font-normal text-neutral-500">Pour {{ recipe.servings }} portion{{ recipe.servings|pluralize }}</span>
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        {% for ingredient in recipe.get_ingredients_list %}
+                        <div class="flex items-center space-x-3 p-3 rounded-xl hover:bg-neutral-50 transition-colors duration-200 group">
+                            <div class="w-2 h-2 bg-secondary-500 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
+                            <span class="text-neutral-700 leading-relaxed">{{ ingredient }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Calculateur de portions -->
+                    <div class="mt-8 p-4 bg-neutral-50 rounded-2xl">
+                        <div class="flex items-center justify-between">
+                            <span class="text-neutral-700 font-medium">Ajuster les portions :</span>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="adjustServings(-1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center text-neutral-600 hover:text-primary-600 transition-colors">
+                                    <i class="fas fa-minus text-sm"></i>
+                                </button>
+                                <span id="current-servings" class="font-bold text-lg min-w-[2rem] text-center">{{ recipe.servings }}</span>
+                                <button onclick="adjustServings(1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center text-neutral-600 hover:text-primary-600 transition-colors">
+                                    <i class="fas fa-plus text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="bg-white rounded-3xl shadow-soft p-8">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-list-ol text-accent-500 mr-3"></i>
+                        Instructions
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        {% for instruction in recipe.get_instructions_list %}
+                        <div class="flex space-x-4 group">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-accent-500 to-accent-600 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform duration-200">
+                                {{ forloop.counter }}
+                            </div>
+                            <div class="flex-1 pt-1">
+                                <p class="text-neutral-700 leading-relaxed">{{ instruction }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Commentaires -->
+                <div class="bg-white rounded-3xl shadow-soft p-8">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-comments text-primary-500 mr-3"></i>
+                        Commentaires
+                        <span class="ml-2 bg-primary-100 text-primary-600 px-2 py-1 rounded-full text-sm font-medium">{{ comments.count }}</span>
+                    </h2>
+                    
+                    <!-- Formulaire d'ajout de commentaire -->
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'recipes:add_comment' recipe.slug %}" class="mb-8">
+                            {% csrf_token %}
+                            <div class="flex space-x-4">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full object-cover">
+                                {% else %}
+                                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-white text-sm"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <textarea name="content" rows="3" placeholder="Partagez votre avis sur cette recette..." class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring resize-none"></textarea>
+                                    <div class="mt-3 flex justify-end">
+                                        <button type="submit" class="btn-primary">
+                                            <i class="fas fa-paper-plane mr-2"></i>
+                                            Publier
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="mb-8 p-6 bg-neutral-50 rounded-2xl text-center">
+                            <p class="text-neutral-600 mb-4">Connectez-vous pour laisser un commentaire</p>
+                            <a href="{% url 'accounts:login' %}" class="btn-primary">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Se connecter
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Liste des commentaires -->
+                    <div class="space-y-6">
+                        {% for comment in comments %}
+                        <div class="flex space-x-4 p-4 rounded-2xl hover:bg-neutral-50 transition-colors duration-200">
+                            {% if comment.author.profile.avatar %}
+                                <img src="{{ comment.author.profile.avatar.url }}" alt="{{ comment.author.username }}" class="w-10 h-10 rounded-full object-cover">
+                            {% else %}
+                                <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="font-semibold text-neutral-900">
+                                        <a href="{% url 'accounts:profile' comment.author.username %}" class="hover:text-primary-600 transition-colors">
+                                            {{ comment.author.get_full_name|default:comment.author.username }}
+                                        </a>
+                                    </span>
+                                    <span class="text-neutral-500 text-sm">{{ comment.created_at|timesince }} ago</span>
+                                </div>
+                                <p class="text-neutral-700 leading-relaxed">{{ comment.content }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-comment text-neutral-400 text-2xl"></i>
+                            </div>
+                            <p class="text-neutral-500">Aucun commentaire pour le moment. Soyez le premier à donner votre avis !</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-8">
+                <!-- Recettes suggérées -->
+                {% if suggested_recipes %}
+                <div class="bg-white rounded-3xl shadow-soft p-6">
+                    <h3 class="text-xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-lightbulb text-accent-500 mr-2"></i>
+                        Recettes similaires
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        {% for suggested in suggested_recipes %}
+                        <a href="{{ suggested.get_absolute_url }}" class="block group">
+                            <div class="flex space-x-3 p-3 rounded-xl hover:bg-neutral-50 transition-colors duration-200">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                                    {% if suggested.image %}
+                                        <img src="{{ suggested.image.url }}" alt="{{ suggested.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    {% else %}
+                                        <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                                            <i class="fas fa-image text-neutral-400"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors duration-200 truncate">
+                                        {{ suggested.title }}
+                                    </h4>
+                                    <div class="flex items-center space-x-2 text-xs text-neutral-500 mt-1">
+                                        <span class="flex items-center">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            {{ suggested.total_time }}min
+                                        </span>
+                                        <span class="flex items-center">
+                                            <i class="fas fa-heart mr-1"></i>
+                                            {{ suggested.likes.count }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Informations nutritionnelles (placeholder) -->
+                <div class="bg-gradient-to-br from-secondary-50 to-primary-50 rounded-3xl p-6">
+                    <h3 class="text-xl font-display font-bold text-neutral-900 mb-6 flex items-center">
+                        <i class="fas fa-apple-alt text-secondary-500 mr-2"></i>
+                        Informations
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-neutral-600">Difficulté</span>
+                            <span class="font-semibold text-neutral-900 capitalize">{{ recipe.difficulty }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-neutral-600">Temps total</span>
+                            <span class="font-semibold text-neutral-900">{{ recipe.total_time }} min</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-neutral-600">Portions</span>
+                            <span class="font-semibold text-neutral-900">{{ recipe.servings }}</span>
+                        </div>
+                        {% if recipe.category %}
+                        <div class="flex justify-between items-center">
+                            <span class="text-neutral-600">Catégorie</span>
+                            <span class="font-semibold text-neutral-900">{{ recipe.category.name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+{% csrf_token %}
+
+<script>
+let originalServings = {{ recipe.servings }};
+
+function adjustServings(change) {
+    const currentElement = document.getElementById('current-servings');
+    let current = parseInt(currentElement.textContent);
+    let newServings = Math.max(1, current + change);
+    
+    currentElement.textContent = newServings;
+    
+    // Ici on pourrait ajuster les quantités d'ingrédients
+    // Pour l'instant, c'est juste visuel
+}
+
+function shareRecipe() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ recipe.title }}',
+            text: '{{ recipe.description|truncatewords:20 }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copier l'URL
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Lien copié dans le presse-papiers !');
+        });
+    }
+}
+
+function printRecipe() {
+    window.print();
+}
+
+function reportRecipe() {
+    // Placeholder pour la fonctionnalité de signalement
+    alert('Fonctionnalité de signalement à implémenter');
+}
+</script>
+
+<!-- CSS pour l'impression -->
+<style media="print">
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    
+    .recipe-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd;
+    }
+</style>
+{% endblock %}

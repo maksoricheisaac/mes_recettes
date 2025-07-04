@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Recherche - MesRecettes{% endblock %}
+
+{% block content %}
+<!-- Hero Section de recherche -->
+<section class="relative py-20 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 overflow-hidden">
+    <!-- Motifs de fond -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-xl animate-float"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent-300 rounded-full mix-blend-overlay filter blur-xl animate-float" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6">
+                Trouvez votre 
+                <span class="bg-gradient-to-r from-accent-300 to-secondary-300 bg-clip-text text-transparent">recette parfaite</span>
+            </h1>
+            <p class="text-xl text-white/90 max-w-3xl mx-auto">
+                Explorez notre collection de recettes avec des filtres avancés pour découvrir exactement ce que vous cherchez
+            </p>
+        </div>
+        
+        <!-- Formulaire de recherche avancée -->
+        <div class="max-w-4xl mx-auto">
+            <form method="GET" class="glass rounded-3xl p-8 space-y-6">
+                <!-- Recherche principale -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-neutral-400"></i>
+                    </div>
+                    <input type="text" name="q" value="{{ query }}" 
+                           placeholder="Rechercher une recette, un ingrédient..." 
+                           class="w-full pl-12 pr-4 py-4 bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl focus-ring text-neutral-900 placeholder-neutral-500 text-lg">
+                </div>
+                
+                <!-- Filtres -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Catégorie -->
+                    <div>
+                        <label class="block text-white font-medium mb-2">
+                            <i class="fas fa-tag mr-2"></i>Catégorie
+                        </label>
+                        <select name="category" class="w-full px-4 py-3 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl focus-ring text-neutral-900">
+                            <option value="">Toutes les catégories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Temps de préparation -->
+                    <div>
+                        <label class="block text-white font-medium mb-2">
+                            <i class="fas fa-clock mr-2"></i>Temps de préparation
+                        </label>
+                        <select name="prep_time" class="w-full px-4 py-3 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl focus-ring text-neutral-900">
+                            <option value="">Peu importe</option>
+                            <option value="15" {% if selected_prep_time == '15' %}selected{% endif %}>Moins de 15 min</option>
+                            <option value="30" {% if selected_prep_time == '30' %}selected{% endif %}>Moins de 30 min</option>
+                            <option value="60" {% if selected_prep_time == '60' %}selected{% endif %}>Moins d'1 heure</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Tri -->
+                    <div>
+                        <label class="block text-white font-medium mb-2">
+                            <i class="fas fa-sort mr-2"></i>Trier par
+                        </label>
+                        <select name="sort" class="w-full px-4 py-3 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl focus-ring text-neutral-900">
+                            <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Plus récentes</option>
+                            <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Plus populaires</option>
+                            <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Plus anciennes</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Bouton de recherche -->
+                <div class="text-center">
+                    <button type="submit" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-accent-400 to-secondary-400 hover:from-accent-500 hover:to-secondary-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group focus:outline-none focus:ring-4 focus:ring-accent-200">
+                        <i class="fas fa-search mr-3 group-hover:scale-110 transition-transform duration-300"></i>
+                        Rechercher
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Résultats de recherche -->
+<section class="py-16 bg-gradient-to-b from-white to-neutral-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête des résultats -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+            <div>
+                <h2 class="text-3xl font-display font-bold text-neutral-900 mb-2">
+                    {% if query %}
+                        Résultats pour "{{ query }}"
+                    {% else %}
+                        Toutes les recettes
+                    {% endif %}
+                </h2>
+                <p class="text-neutral-600">
+                    {{ recipes|length }} recette{{ recipes|length|pluralize }} trouvée{{ recipes|length|pluralize }}
+                    {% if recipes.has_other_pages %}
+                        sur {{ recipes.paginator.count }} au total
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Filtres actifs -->
+            {% if query or selected_category or selected_prep_time %}
+                <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+                    {% if query %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-100 text-primary-700 text-sm font-medium">
+                            <i class="fas fa-search mr-1"></i>
+                            "{{ query }}"
+                            <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_prep_time %}prep_time={{ selected_prep_time }}&{% endif %}sort={{ selected_sort }}" class="ml-2 hover:text-primary-900">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                    {% if selected_category %}
+                        {% for category in categories %}
+                            {% if category.id|stringformat:"s" == selected_category %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-100 text-secondary-700 text-sm font-medium">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    {{ category.name }}
+                                    <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_prep_time %}prep_time={{ selected_prep_time }}&{% endif %}sort={{ selected_sort }}" class="ml-2 hover:text-secondary-900">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if selected_prep_time %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-accent-100 text-accent-700 text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>
+                            {% if selected_prep_time == '15' %}< 15 min{% elif selected_prep_time == '30' %}< 30 min{% elif selected_prep_time == '60' %}< 1h{% endif %}
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ selected_sort }}" class="ml-2 hover:text-accent-900">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Grid des résultats -->
+        {% if recipes %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {% for recipe in recipes %}
+                <article class="recipe-card relative bg-white rounded-2xl shadow-soft overflow-hidden group">
+                    <a href="{{ recipe.get_absolute_url }}" class="absolute inset-0 z-10" aria-label="Voir la recette" style="background:transparent;"></a>
+                    <div class="relative h-48 image-hover-effect pointer-events-none">
+                        {% if recipe.image %}
+                            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                                <i class="fas fa-image text-neutral-400 text-3xl"></i>
+                            </div>
+                        {% endif %}
+                        {% if recipe.category %}
+                            <div class="absolute top-3 left-3">
+                                <span class="text-white px-2 py-1 rounded-lg text-xs font-bold shadow-medium" style="background: linear-gradient(135deg, {{ recipe.category.color }}, {{ recipe.category.color }}dd);">
+                                    {{ recipe.category.name }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="absolute bottom-3 left-3 flex items-center space-x-1">
+                            <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ recipe.total_time }}min
+                            </div>
+                            <div class="glass-dark text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                <i class="fas fa-users mr-1"></i>
+                                {{ recipe.servings }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 pointer-events-none">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="text-lg font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 flex-1 mr-2">
+                                {{ recipe.title }}
+                            </h3>
+                            <div class="flex items-center space-x-1 flex-shrink-0">
+                                {% if recipe.difficulty == 'facile' %}
+                                    <i class="fas fa-star text-secondary-500 text-xs"></i>
+                                    <i class="far fa-star text-neutral-300 text-xs"></i>
+                                    <i class="far fa-star text-neutral-300 text-xs"></i>
+                                {% elif recipe.difficulty == 'moyen' %}
+                                    <i class="fas fa-star text-accent-500 text-xs"></i>
+                                    <i class="fas fa-star text-accent-500 text-xs"></i>
+                                    <i class="far fa-star text-neutral-300 text-xs"></i>
+                                {% else %}
+                                    <i class="fas fa-star text-red-500 text-xs"></i>
+                                    <i class="fas fa-star text-red-500 text-xs"></i>
+                                    <i class="fas fa-star text-red-500 text-xs"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="text-neutral-600 text-sm mb-4 leading-relaxed">{{ recipe.description|truncatewords:12 }}</p>
+                        <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
+                            <div class="flex items-center space-x-2">
+                                {% if recipe.author.profile.avatar %}
+                                    <img src="{{ recipe.author.profile.avatar.url }}" alt="{{ recipe.author.username }}" class="w-6 h-6 rounded-full object-cover">
+                                {% else %}
+                                    <div class="w-6 h-6 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-white text-xs"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="text-xs font-medium text-neutral-700">{{ recipe.author.first_name|default:recipe.author.username }}</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-xs text-neutral-500">
+                                <span class="flex items-center">
+                                    <i class="fas fa-heart mr-1 text-red-500"></i>
+                                    <span id="like-count-{{ recipe.slug }}">{{ recipe.num_likes|default:recipe.likes.count }}</span>
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-comment mr-1"></i>
+                                    {{ recipe.comments.count }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if recipes.has_other_pages %}
+                <div class="flex justify-center mt-16">
+                    <nav class="flex items-center space-x-2">
+                        {% if recipes.has_previous %}
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_prep_time %}prep_time={{ selected_prep_time }}&{% endif %}sort={{ selected_sort }}&page={{ recipes.previous_page_number }}" 
+                               class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in recipes.paginator.page_range %}
+                            {% if recipes.number == num %}
+                                <span class="w-10 h-10 bg-primary-500 text-white rounded-xl flex items-center justify-center font-semibold shadow-glow">
+                                    {{ num }}
+                                </span>
+                            {% elif num > recipes.number|add:'-3' and num < recipes.number|add:'3' %}
+                                <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_prep_time %}prep_time={{ selected_prep_time }}&{% endif %}sort={{ selected_sort }}&page={{ num }}" 
+                                   class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if recipes.has_next %}
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_prep_time %}prep_time={{ selected_prep_time }}&{% endif %}sort={{ selected_sort }}&page={{ recipes.next_page_number }}" 
+                               class="w-10 h-10 bg-white rounded-xl shadow-soft flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:shadow-medium transition-all duration-300">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Aucun résultat -->
+            <div class="text-center py-16">
+                <div class="w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-search text-neutral-400 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-display font-bold text-neutral-900 mb-4">Aucune recette trouvée</h3>
+                <p class="text-neutral-600 mb-8 max-w-md mx-auto">
+                    Essayez de modifier vos critères de recherche ou explorez nos catégories populaires.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'core:search' %}" class="btn-primary">
+                        <i class="fas fa-redo mr-2"></i>
+                        Nouvelle recherche
+                    </a>
+                    <a href="{% url 'recipes:list' %}" class="btn-outline">
+                        <i class="fas fa-list mr-2"></i>
+                        Voir toutes les recettes
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% csrf_token %}
+{% endblock %}

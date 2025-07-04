@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - MesRecettes{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 bg-gradient-to-br from-neutral-50 to-primary-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="text-center mb-12">
+            <div class="flex justify-center mb-6">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-gradient-to-r from-primary-500 to-secondary-500 p-4 rounded-2xl">
+                        <i class="fas fa-utensils text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-3xl lg:text-4xl font-display font-bold text-neutral-900 mb-4">
+                {{ title }}
+            </h1>
+            <p class="text-xl text-neutral-600 max-w-2xl mx-auto">
+                {% if recipe %}
+                    Modifiez votre recette et partagez vos améliorations avec la communauté
+                {% else %}
+                    Partagez votre création culinaire avec notre communauté de passionnés
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="bg-white rounded-3xl shadow-strong p-8 lg:p-12">
+            <form method="post" enctype="multipart/form-data" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Messages d'erreur globaux -->
+                {% if form.errors %}
+                    <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                            <h3 class="text-lg font-semibold text-red-700">Veuillez corriger les erreurs suivantes :</h3>
+                        </div>
+                        <ul class="text-red-600 space-y-2">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li class="flex items-start">
+                                        <i class="fas fa-dot-circle text-xs mt-2 mr-2"></i>
+                                        <span>{{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Section 1: Informations de base -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 flex items-center">
+                        <i class="fas fa-info-circle text-primary-500 mr-3"></i>
+                        Informations de base
+                    </h2>
+                    
+                    <!-- Titre -->
+                    <div>
+                        <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            Titre de la recette *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.title.name }}" 
+                               id="{{ form.title.id_for_label }}"
+                               value="{{ form.title.value|default:'' }}"
+                               required
+                               class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.title.errors %}border-red-300 bg-red-50{% endif %}"
+                               placeholder="Ex: Tarte aux pommes de grand-mère">
+                        {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            Description *
+                        </label>
+                        <textarea name="{{ form.description.name }}" 
+                                  id="{{ form.description.id_for_label }}"
+                                  rows="4"
+                                  required
+                                  class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 resize-none {% if form.description.errors %}border-red-300 bg-red-50{% endif %}"
+                                  placeholder="Décrivez votre recette en quelques phrases...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Catégorie et Image -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Catégorie -->
+                        <div>
+                            <label for="{{ form.category.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                Catégorie *
+                            </label>
+                            <select name="{{ form.category.name }}" 
+                                    id="{{ form.category.id_for_label }}"
+                                    required
+                                    class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.category.errors %}border-red-300 bg-red-50{% endif %}">
+                                <option value="">Choisir une catégorie</option>
+                                {% for value, label in form.category.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image -->
+                        <div>
+                            <label for="{{ form.image.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                Photo de la recette
+                            </label>
+                            <div class="relative">
+                                <input type="file" 
+                                       name="{{ form.image.name }}" 
+                                       id="{{ form.image.id_for_label }}"
+                                       accept="image/*"
+                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.image.errors %}border-red-300 bg-red-50{% endif %}"
+                                       onchange="previewImage(this)">
+                                {% if recipe and recipe.image %}
+                                    <div class="mt-2">
+                                        <img src="{{ recipe.image.url }}" alt="Image actuelle" class="w-20 h-20 object-cover rounded-lg">
+                                        <p class="text-xs text-neutral-500 mt-1">Image actuelle</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div id="image-preview" class="mt-2 hidden">
+                                <img id="preview-img" class="w-20 h-20 object-cover rounded-lg">
+                                <p class="text-xs text-neutral-500 mt-1">Aperçu</p>
+                            </div>
+                            {% if form.image.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.image.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Détails de la recette -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 flex items-center">
+                        <i class="fas fa-cogs text-secondary-500 mr-3"></i>
+                        Détails de la recette
+                    </h2>
+                    
+                    <!-- Temps et portions -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Temps de préparation -->
+                        <div>
+                            <label for="{{ form.prep_time.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                <i class="fas fa-clock text-primary-500 mr-1"></i>
+                                Préparation (min) *
+                            </label>
+                            <input type="number" 
+                                   name="{{ form.prep_time.name }}" 
+                                   id="{{ form.prep_time.id_for_label }}"
+                                   value="{{ form.prep_time.value|default:'' }}"
+                                   min="0"
+                                   required
+                                   class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.prep_time.errors %}border-red-300 bg-red-50{% endif %}"
+                                   placeholder="15">
+                            {% if form.prep_time.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.prep_time.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Temps de cuisson -->
+                        <div>
+                            <label for="{{ form.cook_time.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                <i class="fas fa-fire text-accent-500 mr-1"></i>
+                                Cuisson (min) *
+                            </label>
+                            <input type="number" 
+                                   name="{{ form.cook_time.name }}" 
+                                   id="{{ form.cook_time.id_for_label }}"
+                                   value="{{ form.cook_time.value|default:'' }}"
+                                   min="0"
+                                   required
+                                   class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.cook_time.errors %}border-red-300 bg-red-50{% endif %}"
+                                   placeholder="30">
+                            {% if form.cook_time.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.cook_time.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nombre de portions -->
+                        <div>
+                            <label for="{{ form.servings.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                <i class="fas fa-users text-secondary-500 mr-1"></i>
+                                Portions *
+                            </label>
+                            <input type="number" 
+                                   name="{{ form.servings.name }}" 
+                                   id="{{ form.servings.id_for_label }}"
+                                   value="{{ form.servings.value|default:'' }}"
+                                   min="1"
+                                   required
+                                   class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.servings.errors %}border-red-300 bg-red-50{% endif %}"
+                                   placeholder="4">
+                            {% if form.servings.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.servings.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Difficulté -->
+                    <div>
+                        <label for="{{ form.difficulty.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            Niveau de difficulté *
+                        </label>
+                        <select name="{{ form.difficulty.name }}" 
+                                id="{{ form.difficulty.id_for_label }}"
+                                required
+                                class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.difficulty.errors %}border-red-300 bg-red-50{% endif %}">
+                            <option value="">Choisir la difficulté</option>
+                            {% for value, label in form.difficulty.field.choices %}
+                                <option value="{{ value }}" {% if form.difficulty.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.difficulty.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.difficulty.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Section 3: Ingrédients -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 flex items-center">
+                        <i class="fas fa-list text-accent-500 mr-3"></i>
+                        Ingrédients
+                    </h2>
+                    
+                    <div>
+                        <label for="{{ form.ingredients.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            Liste des ingrédients *
+                        </label>
+                        <textarea name="{{ form.ingredients.name }}" 
+                                  id="{{ form.ingredients.id_for_label }}"
+                                  rows="10"
+                                  required
+                                  class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 resize-none {% if form.ingredients.errors %}border-red-300 bg-red-50{% endif %}"
+                                  placeholder="Listez les ingrédients, un par ligne. Exemple :&#10;250g de farine&#10;3 œufs&#10;200ml de lait&#10;1 pincée de sel">{{ form.ingredients.value|default:'' }}</textarea>
+                        <p class="mt-2 text-sm text-neutral-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Écrivez chaque ingrédient sur une ligne séparée avec les quantités précises.
+                        </p>
+                        {% if form.ingredients.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.ingredients.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Section 4: Instructions -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 flex items-center">
+                        <i class="fas fa-list-ol text-primary-500 mr-3"></i>
+                        Instructions
+                    </h2>
+                    
+                    <div>
+                        <label for="{{ form.instructions.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            Étapes de préparation *
+                        </label>
+                        <textarea name="{{ form.instructions.name }}" 
+                                  id="{{ form.instructions.id_for_label }}"
+                                  rows="12"
+                                  required
+                                  class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 resize-none {% if form.instructions.errors %}border-red-300 bg-red-50{% endif %}"
+                                  placeholder="Décrivez les étapes de préparation, une par ligne. Exemple :&#10;Préchauffer le four à 180°C&#10;Mélanger la farine et les œufs dans un saladier&#10;Ajouter le lait progressivement en mélangeant&#10;Verser la pâte dans un moule beurré&#10;Cuire 30 minutes au four">{{ form.instructions.value|default:'' }}</textarea>
+                        <p class="mt-2 text-sm text-neutral-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Décrivez chaque étape clairement, une par ligne, dans l'ordre chronologique.
+                        </p>
+                        {% if form.instructions.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.instructions.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Section 5: Publication -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-display font-bold text-neutral-900 flex items-center">
+                        <i class="fas fa-share-alt text-secondary-500 mr-3"></i>
+                        Publication
+                    </h2>
+                    
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" 
+                               name="{{ form.is_published.name }}" 
+                               id="{{ form.is_published.id_for_label }}"
+                               {% if form.is_published.value %}checked{% endif %}
+                               class="h-5 w-5 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded">
+                        <label for="{{ form.is_published.id_for_label }}" class="text-sm font-medium text-neutral-700">
+                            Publier cette recette immédiatement
+                        </label>
+                    </div>
+                    <p class="text-sm text-neutral-500">
+                        Si vous décochez cette option, votre recette sera sauvegardée en brouillon et ne sera pas visible par les autres utilisateurs.
+                    </p>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-neutral-200">
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-primary-500 to-secondary-500 shadow-md hover:from-primary-600 hover:to-secondary-600 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-primary-400">
+                        <i class="fas fa-save mr-2 group-hover:scale-110 transition-transform duration-300"></i>
+                        {{ button_text }}
+                    </button>
+
+                    <a href="{% if recipe %}{{ recipe.get_absolute_url }}{% else %}{% url 'recipes:list' %}{% endif %}" 
+                       class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-primary-600 border border-primary-300 bg-white shadow-md hover:bg-primary-50 transition-all duration-300 text-center focus:outline-none focus:ring-2 focus:ring-primary-200">
+                        <i class="fas fa-times mr-2"></i>
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+
+// Auto-resize des textareas
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+
+// Validation en temps réel
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('border-red-300', 'bg-red-50');
+            } else {
+                this.classList.remove('border-red-300', 'bg-red-50');
+                this.classList.add('border-green-300', 'bg-green-50');
+            }
+        });
+        
+        field.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.classList.remove('border-red-300', 'bg-red-50');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

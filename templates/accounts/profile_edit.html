@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier mon profil - MesRecettes{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 to-secondary-50">
+    <div class="max-w-lg w-full space-y-8">
+        <div class="text-center">
+            <div class="flex justify-center mb-6">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-gradient-to-r from-primary-500 to-secondary-500 p-4 rounded-2xl">
+                        <i class="fas fa-user-edit text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-neutral-900 mb-2">
+                Modifier mon profil
+            </h2>
+            <p class="text-neutral-600">
+                Mettez à jour vos informations personnelles
+            </p>
+        </div>
+        <div class="bg-white rounded-3xl shadow-strong p-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                {% if user_form.errors %}
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                            <span class="text-red-700 font-medium">Veuillez corriger les erreurs suivantes :</span>
+                        </div>
+                        <ul class="text-sm text-red-600 space-y-1">
+                            {% for field, errors in user_form.errors.items %}
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if profile_form.errors %}
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                            <span class="text-red-700 font-medium">Veuillez corriger les erreurs suivantes :</span>
+                        </div>
+                        <ul class="text-sm text-red-600 space-y-1">
+                            {% for field, errors in profile_form.errors.items %}
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                <!-- Infos utilisateur -->
+                <h3 class="text-lg font-semibold text-neutral-800 mb-2">Informations personnelles</h3>
+                {% for field in user_form.visible_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p class="mt-1 text-xs text-neutral-500">{{ field.help_text }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <!-- Infos profil -->
+                <h3 class="text-lg font-semibold text-neutral-800 mb-2 mt-6">Profil</h3>
+                {% for field in profile_form.visible_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p class="mt-1 text-xs text-neutral-500">{{ field.help_text }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold shadow-lg hover:from-primary-600 hover:to-secondary-600 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2">
+                    <i class="fas fa-save mr-2 group-hover:scale-110 transition-transform duration-300"></i>
+                    Enregistrer les modifications
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

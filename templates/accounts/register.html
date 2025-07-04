@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - MesRecettes{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-secondary-50 to-primary-50">
+    <div class="max-w-lg w-full space-y-8">
+        <!-- En-tête -->
+        <div class="text-center">
+            <div class="flex justify-center mb-6">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-secondary-500 to-primary-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-gradient-to-r from-secondary-500 to-primary-500 p-4 rounded-2xl">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-neutral-900 mb-2">
+                Rejoignez la communauté
+            </h2>
+            <p class="text-neutral-600">
+                Créez votre compte et commencez à partager vos recettes
+            </p>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="bg-white rounded-3xl shadow-strong p-8">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Messages d'erreur -->
+                {% if form.errors %}
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                            <span class="text-red-700 font-medium">Veuillez corriger les erreurs suivantes :</span>
+                        </div>
+                        <ul class="text-sm text-red-600 space-y-1">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Nom d'utilisateur -->
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                        <i class="fas fa-user mr-2 text-secondary-500"></i>
+                        Nom d'utilisateur *
+                    </label>
+                    <input type="text" 
+                           name="{{ form.username.name }}" 
+                           id="{{ form.username.id_for_label }}"
+                           value="{{ form.username.value|default:'' }}"
+                           required
+                           class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.username.errors %}border-red-300 bg-red-50{% endif %}"
+                           placeholder="Choisissez un nom d'utilisateur unique">
+                    {% if form.username.help_text %}
+                        <p class="mt-1 text-xs text-neutral-500">{{ form.username.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Prénom et Nom -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            <i class="fas fa-id-card mr-2 text-secondary-500"></i>
+                            Prénom *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.first_name.name }}" 
+                               id="{{ form.first_name.id_for_label }}"
+                               value="{{ form.first_name.value|default:'' }}"
+                               required
+                               class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.first_name.errors %}border-red-300 bg-red-50{% endif %}"
+                               placeholder="Votre prénom">
+                    </div>
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                            <i class="fas fa-id-card mr-2 text-secondary-500"></i>
+                            Nom *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.last_name.name }}" 
+                               id="{{ form.last_name.id_for_label }}"
+                               value="{{ form.last_name.value|default:'' }}"
+                               required
+                               class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.last_name.errors %}border-red-300 bg-red-50{% endif %}"
+                               placeholder="Votre nom">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                        <i class="fas fa-envelope mr-2 text-secondary-500"></i>
+                        Adresse email *
+                    </label>
+                    <input type="email" 
+                           name="{{ form.email.name }}" 
+                           id="{{ form.email.id_for_label }}"
+                           value="{{ form.email.value|default:'' }}"
+                           required
+                           class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.email.errors %}border-red-300 bg-red-50{% endif %}"
+                           placeholder="votre@email.com">
+                </div>
+
+                <!-- Mot de passe -->
+                <div>
+                    <label for="{{ form.password1.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-secondary-500"></i>
+                        Mot de passe *
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               name="{{ form.password1.name }}" 
+                               id="{{ form.password1.id_for_label }}"
+                               required
+                               class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.password1.errors %}border-red-300 bg-red-50{% endif %}"
+                               placeholder="Choisissez un mot de passe sécurisé">
+                        <button type="button" onclick="togglePassword('{{ form.password1.id_for_label }}', 'password1-toggle-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600">
+                            <i class="fas fa-eye" id="password1-toggle-icon"></i>
+                        </button>
+                    </div>
+                    {% if form.password1.help_text %}
+                        <div class="mt-2 text-xs text-neutral-500 space-y-1">
+                            {{ form.password1.help_text|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Confirmation mot de passe -->
+                <div>
+                    <label for="{{ form.password2.id_for_label }}" class="block text-sm font-semibold text-neutral-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-secondary-500"></i>
+                        Confirmer le mot de passe *
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               name="{{ form.password2.name }}" 
+                               id="{{ form.password2.id_for_label }}"
+                               required
+                               class="w-full px-4 py-3 border border-neutral-300 rounded-xl shadow-sm focus-ring bg-neutral-50 focus:bg-white transition-all duration-300 {% if form.password2.errors %}border-red-300 bg-red-50{% endif %}"
+                               placeholder="Confirmez votre mot de passe">
+                        <button type="button" onclick="togglePassword('{{ form.password2.id_for_label }}', 'password2-toggle-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600">
+                            <i class="fas fa-eye" id="password2-toggle-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Conditions d'utilisation -->
+                <div class="flex items-start">
+                    <input type="checkbox" id="terms" name="terms" required class="h-4 w-4 text-secondary-600 focus:ring-secondary-500 border-neutral-300 rounded mt-1">
+                    <label for="terms" class="ml-3 block text-sm text-neutral-700">
+                        J'accepte les 
+                        <a href="#" class="text-secondary-600 hover:text-secondary-500 font-medium">conditions d'utilisation</a>
+                        et la 
+                        <a href="#" class="text-secondary-600 hover:text-secondary-500 font-medium">politique de confidentialité</a>
+                    </label>
+                </div>
+
+                <!-- Bouton d'inscription -->
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-secondary-500 to-primary-500 shadow-lg hover:from-secondary-600 hover:to-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-all duration-300 group text-lg">
+                    <i class="fas fa-user-plus mr-2 group-hover:scale-110 transition-transform duration-300"></i>
+                    Créer mon compte
+                </button>
+
+                <!-- Séparateur -->
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-neutral-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-neutral-500">ou</span>
+                    </div>
+                </div>
+
+                <!-- Lien de connexion -->
+                <div class="text-center">
+                    <p class="text-neutral-600">
+                        Déjà un compte ?
+                        <a href="{% url 'accounts:login' %}" class="font-semibold text-secondary-600 hover:text-secondary-500 transition-colors duration-300">
+                            Se connecter
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Avantages de l'inscription -->
+        <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-6">
+            <h3 class="text-lg font-display font-semibold text-neutral-900 mb-4 text-center">
+                Pourquoi rejoindre MesRecettes ?
+            </h3>
+            <div class="grid grid-cols-1 gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-secondary-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-plus text-secondary-600"></i>
+                    </div>
+                    <span class="text-sm text-neutral-700">Partagez vos recettes favorites</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-heart text-red-600"></i>
+                    </div>
+                    <span class="text-sm text-neutral-700">Sauvegardez vos coups de cœur</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users text-primary-600"></i>
+                    </div>
+                    <span class="text-sm text-neutral-700">Rejoignez une communauté passionnée</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function togglePassword(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Validation en temps réel
+document.addEventListener('DOMContentLoaded', function() {
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+    
+    function validatePasswords() {
+        if (password1.value && password2.value) {
+            if (password1.value === password2.value) {
+                password2.classList.remove('border-red-300', 'bg-red-50');
+                password2.classList.add('border-green-300', 'bg-green-50');
+            } else {
+                password2.classList.remove('border-green-300', 'bg-green-50');
+                password2.classList.add('border-red-300', 'bg-red-50');
+            }
+        }
+    }
+    
+    password1.addEventListener('input', validatePasswords);
+    password2.addEventListener('input', validatePasswords);
+});
+</script>
+{% endblock %}
